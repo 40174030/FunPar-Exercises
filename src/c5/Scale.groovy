@@ -5,7 +5,10 @@ import org.jcsp.groovy.*
 import c05.ScaledData     
    
 class Scale implements CSProcess {
+	
   def int scaling
+  def int multiplier
+  
   def ChannelOutput outChannel
   def ChannelOutput factor
   def ChannelInput inChannel
@@ -28,25 +31,52 @@ class Scale implements CSProcess {
     preCon[INJECT] = false
     preCon[TIMER] = true
     preCon[INPUT] = true
-    def suspended = false
                                                                     
     def timeout = timer.read() + DOUBLE_INTERVAL
     timer.setAlarm ( timeout )
     
     while (true) {
       switch ( scaleAlt.priSelect(preCon) ) {
+		  
         case SUSPEND :
-          //  deal with suspend input        
+          //  deal with suspend input
+		  suspend.read()
+		  factor.write(scaling)
+		  println "Suspended"
+		  preCon[SUSPEND] = false
+		  preCon[TIMER] = false
+		  preCon[INJECT] = true       
           break
         case INJECT:
           //  deal with inject input
+		  scaling = injector.read()
+		  println "Injected scaling is ${scaling}"
+		  timeout = timer.read() + DOUBLE_INTERVAL
+		  timer.setAlarm(timeout)
+		  preCon[INJECT] = false
+		  preCon[SUSPEND] = true
+		  preCon[TIMER] = true
           break
         case TIMER:
           //  deal with Timer input
+		  timeout = timer.read() + DOUBLE_INTERVAL
+		  timer.setAlarm(timeout)
+		  scaling = scaling * multiplier
           println "Normal Timer: new scaling is ${scaling}"
           break
         case INPUT:
           //   deal with Input channel 
+		  def inValue = inChannel.read()
+		  def result = new ScaledData()
+		  if (preCon[SUSPEND]) {
+		  	result.original = inValue
+			result.scaled = inValue * scaling
+		  }
+		  else {
+			result.original = inValue
+		    result.scaled = inValue
+		  }
+		  outChannel.write(result)
           break
       } //end-switch
     } //end-while
