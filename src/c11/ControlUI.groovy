@@ -7,33 +7,39 @@ import java.awt.*
 
 class ControlUI implements CSProcess {
 
-	def ActiveCanvas canvas
 	def ChannelInput suspendButtonConfig
 	def ChannelInput scaleValueReset
-	def ChannelOutput scaleValueConfig
-	def ChannelOutput buttonEvent
+	def ChannelInput displayScaledData
+	
+	def ChannelOutput suspendButtonEvent
+	def ChannelOutput injectValueEvent
+//	def ChannelOutput injectButtonEvent
+	
 	
 	void run()
 	{
 		def root = new ActiveClosingFrame("Scaling")
 		def mainFrame = root.getActiveFrame()
-		mainFrame.setSize(100, 500)
 		
-		def suspendButton = new ActiveButton(suspendButtonConfig, buttonEvent, "Suspend")
+		def consoleOutput = new ActiveTextField(displayScaledData, null, "")
+		
+		def suspendButton = new ActiveButton(suspendButtonConfig, suspendButtonEvent, "Suspend")
 		def scaleLabel = new Label("Scale by:")
-		def scaleValue = new ActiveTextEnterField(scaleValueReset, scaleValueConfig, "")
-		def injectButton = new ActiveButton(null, buttonEvent, "Inject")
+		def scaleValue = new ActiveTextEnterField(scaleValueReset, injectValueEvent, "")
 		
 		def container = new Container()
 		container.setLayout(new GridLayout(1,5))
+		container.add(suspendButton)
+		container.add(scaleLabel)
+		container.add(scaleValue.getActiveTextField())
 		
 		mainFrame.setLayout(new BorderLayout())
-		mainFrame.add(canvas, BorderLayout.CENTER)
+		mainFrame.add(consoleOutput, BorderLayout.CENTER)
 		mainFrame.add(container, BorderLayout.SOUTH)
 		
 		mainFrame.pack()
 		mainFrame.setVisible(true)
-		def network = [root, canvas, scaleValue, suspendButton, injectButton]
+		def network = [root, consoleOutput, scaleValue, suspendButton]
 		new PAR (network).run()
 	}
 	

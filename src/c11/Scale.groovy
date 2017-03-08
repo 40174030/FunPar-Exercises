@@ -9,11 +9,12 @@ class Scale implements CSProcess {
   def int scaling
   def int multiplier
   
-  def ChannelOutput outChannel
-  def ChannelOutput factor
   def ChannelInput inChannel
   def ChannelInput suspend
   def ChannelInput injector
+  def ChannelOutput outChannel
+  def ChannelOutput factor
+  def ChannelOutput buttonMode
   
   void run () {
     def SECOND = 1000
@@ -42,7 +43,8 @@ class Scale implements CSProcess {
           //  deal with suspend input
 		  suspend.read()
 		  factor.write(scaling)
-		  println "Suspended"
+		  outChannel.write("Suspended")
+		  buttonMode.write("Inject")
 		  preCon[SUSPEND] = false
 		  preCon[TIMER] = false
 		  preCon[INJECT] = true       
@@ -50,7 +52,8 @@ class Scale implements CSProcess {
         case INJECT:
           //  deal with inject input
 		  scaling = injector.read()
-		  println "Injected scaling is ${scaling}"
+		  outChannel.write("Injected scaling is ${scaling}")
+		  buttonMode.write("Suspend")
 		  timeout = timer.read() + DOUBLE_INTERVAL
 		  timer.setAlarm(timeout)
 		  preCon[INJECT] = false
@@ -62,7 +65,7 @@ class Scale implements CSProcess {
 		  timeout = timer.read() + DOUBLE_INTERVAL
 		  timer.setAlarm(timeout)
 		  scaling = scaling * multiplier
-          println "Normal Timer: new scaling is ${scaling}"
+          outChannel.write("Normal Timer: new scaling is ${scaling}")
           break
         case INPUT:
           //   deal with Input channel 
