@@ -7,13 +7,11 @@ import java.awt.*
 
 class ControlUI implements CSProcess {
 
-	def ChannelInput suspendButtonConfig
 	def ChannelInput scaleValueReset
 	def ChannelInput displayScaledData
-	
 	def ChannelOutput suspendButtonEvent
 	def ChannelOutput injectValueEvent
-//	def ChannelOutput injectButtonEvent
+	def ChannelInput suspendButtonConfig
 	
 	
 	void run()
@@ -21,14 +19,16 @@ class ControlUI implements CSProcess {
 		def root = new ActiveClosingFrame("Scaling")
 		def mainFrame = root.getActiveFrame()
 		
-		def consoleOutput = new ActiveTextField(displayScaledData, null, "")
+		def consoleOutput = new ActiveTextArea(displayScaledData, null, "")
 		
 		def suspendButton = new ActiveButton(suspendButtonConfig, suspendButtonEvent, "Suspend")
+		
 		def scaleLabel = new Label("Scale by:")
+		scaleLabel.setAlignment(Label.RIGHT)
 		def scaleValue = new ActiveTextEnterField(scaleValueReset, injectValueEvent, "")
 		
 		def container = new Container()
-		container.setLayout(new GridLayout(1,5))
+		container.setLayout(new GridLayout(1,3))
 		container.add(suspendButton)
 		container.add(scaleLabel)
 		container.add(scaleValue.getActiveTextField())
